@@ -1,0 +1,12 @@
+{
+  "to": "s3",
+  "endpoint": "http://localhost:9000",
+  "region": "us-east-2",
+  "bucket": "github-bridge-actions",
+  "project": "Bridge Actions",
+  "projectSlug": "bridge-actions",
+  "resource": "messages",
+  "resourceSlug": "{lang}.json",
+  "fileName": "{lang}.json",
+  "sourceLanguage": "en"
+}

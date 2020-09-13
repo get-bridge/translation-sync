@@ -1,0 +1,74 @@
+name: ci
+
+on: [push, repository_dispatch]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    env:
+      TRANSLATION_S3_PATH: s3://github-bridge-actions/sources/bridge-actions/en/en.json
+      AWS_ACCESS_KEY_ID: access_key
+      AWS_SECRET_ACCESS_KEY: sekret42
+      PRIVATE_NPM_PASSWORD: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: instructure-bridge/npm-login@v1
+        with:
+          scope: inst
+          registry: ${{ secrets.INSTRUCTURE_NPM_REGISTRY }}
+          email: ${{ secrets.INSTRUCTURE_NPM_EMAIL }}
+          password: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
+          username: ${{ secrets.INSTRUCTURE_NPM_USERNAME }}
+
+      - name: Start MinIO
+        run: |
+          docker run \
+            --name=minio \
+            --detach \
+            -p 9000:9000 \
+            -e MINIO_ACCESS_KEY=${{ env.AWS_ACCESS_KEY_ID }} \
+            -e MINIO_SECRET_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} \
+            --health-interval=2s \
+            --health-cmd="curl --fail http://localhost:9000/minio/health/ready || exit 1" \
+            minio/minio \
+            server /data
+
+      - name: Wait for MinIO to be healthy
+        run: |
+          set -o xtrace
+          healthcheck () {
+            docker inspect --format='{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}' minio;
+          }
+          until [ "$(healthcheck)" = "healthy" ]; do sleep 2; done
+
+      - name: Create bucket 'github-bridge-actions'
+        run: |
+          # make the bucket match what's in config.json
+          aws --endpoint-url=http://localhost:9000 s3 mb s3://github-bridge-actions --region us-east-2
+
+      - name: Populate bucket with test fixture
+        run: aws --endpoint-url=http://localhost:9000 s3 cp test/fixtures/translations.json ${TRANSLATION_S3_PATH}
+      - name: Simulate adding a new translation message to en.json
+        run: |
+          cat test/fixtures/translations.json | \
+            jq '. + { "a_third_translation_key": { "message": "A third translation key" } }' \
+            > test/fixtures/en.json
+
+      - uses: ./
+        with:
+          config: test/fixtures/config.json
+
+      - name: Assert S3 was updated and matches local en.json
+        env:
+          EXPECTED_JSON: '{"a_first_translation_key": {"message": "A first translation key"}, "a_second_translation_key": {"message": "A second translation key"}, "a_third_translation_key": {"message": "A third translation key"}}'
+        run: |
+          set -exu
+          translation_json=$(
+            aws --endpoint-url=http://localhost:9000 \
+              s3 cp ${TRANSLATION_S3_PATH} - \
+            | jq --compact-output . \
+            | jq --raw-input . \
+          )
+          expected_json=$(echo ${EXPECTED_JSON} | jq --compact-output . | jq --raw-input .)
+          test "$translation_json" = "$expected_json"
