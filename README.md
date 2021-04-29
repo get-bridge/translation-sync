@@ -1,7 +1,7 @@
 # translation-sync
 
-![ci](https://github.com/instructure-bridge/translation-sync/workflows/ci/badge.svg)
-![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/instructure-bridge/translation-sync?sort=semver)
+![ci](https://github.com/get-bridge/translation-sync/workflows/ci/badge.svg)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/get-bridge/translation-sync?sort=semver)
 
 Sync translation files to and from an s3-compatible remote bucket. This uses
 `@inst/sync-format-message-tranlations` and thus requires authentication with
@@ -10,14 +10,14 @@ our internal npm registry. For an example configuration file, see
 
 ## Usage
 
-    - uses: instructure-bridge/npm-login@v1
+    - uses: get-bridge/npm-login@v1
       with:
         email: ${{ secrets.INSTRUCTURE_NPM_EMAIL }}
         password: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
         registry: ${{ secrets.INSTRUCTURE_NPM_REGISTRY }}
         scope: inst
         username: ${{ secrets.INSTRUCTURE_NPM_USERNAME }}
-    - uses: instructure-bridge/translation-sync@v1.0.0
+    - uses: get-bridge/translation-sync@v1.0.0
       with:
         config: test/fixtures/config.json
 
