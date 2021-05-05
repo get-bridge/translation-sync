@@ -10,6 +10,7 @@ jobs:
       AWS_ACCESS_KEY_ID: access_key
       AWS_SECRET_ACCESS_KEY: sekret42
       PRIVATE_NPM_PASSWORD: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
+      AWS_EC2_METADATA_DISABLED: true
     steps:
       - uses: actions/checkout@v2
 
