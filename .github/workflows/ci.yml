@@ -12,7 +12,7 @@ jobs:
       PRIVATE_NPM_PASSWORD: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
       AWS_EC2_METADATA_DISABLED: true
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
 
       - uses: get-bridge/npm-login@v1
         with:
