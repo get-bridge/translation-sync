@@ -2,7 +2,7 @@ name: Translation Sync
 
 description: |
   Sync translation files to and from an s3-compatible remote bucket. This uses
-  `@inst/sync-format-message-tranlations` and thus requires authentication with
+  `@inst/sync-format-message-translations` and thus requires authentication with
   Instructure's internal npm registry.
 
 inputs:

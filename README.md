@@ -4,7 +4,7 @@
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/get-bridge/translation-sync?sort=semver)
 
 Sync translation files to and from an s3-compatible remote bucket. This uses
-`@inst/sync-format-message-tranlations` and thus requires authentication with
+`@inst/sync-format-message-translations` and thus requires authentication with
 our internal npm registry. For an example configuration file, see
 [config.json](test/fixtures/config.json)
 
