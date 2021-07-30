@@ -2,8 +2,8 @@ name: Translation Sync
 
 description: |
   Sync translation files to and from an s3-compatible remote bucket. This uses
-  `@inst/sync-format-message-translations` and thus requires authentication with
-  Instructure's internal npm registry.
+  `@get-bridge/sync-format-message-translations` and thus requires authentication
+  with Github Packages.
 
 inputs:
   config:
@@ -13,9 +13,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Run @inst/sync-format-message-translations
+    - name: Run @get-bridge/sync-format-message-translations
       shell: bash
       env:
         INPUT_CONFIG: ${{ inputs.config }}
       run: |
-        npx @inst/sync-format-message-translations@^1.4.0 sync-translations --config "${INPUT_CONFIG:-TRANSLATION_SYNC_CONFIG}" --ignore-jira
+        npx @get-bridge/sync-format-message-translations@^1.4.0 sync-translations --config "${INPUT_CONFIG:-TRANSLATION_SYNC_CONFIG}" --ignore-jira

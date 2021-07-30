@@ -9,18 +9,18 @@ jobs:
       TRANSLATION_S3_PATH: s3://github-bridge-actions/sources/bridge-actions/en/en.json
       AWS_ACCESS_KEY_ID: access_key
       AWS_SECRET_ACCESS_KEY: sekret42
-      PRIVATE_NPM_PASSWORD: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
+      BRIDGE_GITHUB_PACKAGES_NPM_AUTH_TOKEN: ${{ secrets.GIT_HUB_PACKAGES_TOKEN }}
       AWS_EC2_METADATA_DISABLED: true
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - uses: get-bridge/npm-login@v1
-        with:
-          scope: inst
-          registry: ${{ secrets.INSTRUCTURE_NPM_REGISTRY }}
-          email: ${{ secrets.INSTRUCTURE_NPM_EMAIL }}
-          password: ${{ secrets.INSTRUCTURE_NPM_PASSWORD }}
-          username: ${{ secrets.INSTRUCTURE_NPM_USERNAME }}
+      - name: Configure private repositories
+        # there are several bugs in npm 6.14.x that prevented us from using `npm config` for now
+        run: |
+          tee -a ~/.npmrc << END
+          @get-bridge:registry=https://npm.pkg.github.com/
+          //npm.pkg.github.com/:_authToken=\${BRIDGE_GITHUB_PACKAGES_NPM_AUTH_TOKEN}
+          END
 
       - name: Start MinIO
         run: |
