@@ -9,20 +9,23 @@ Github Packages.
 
 ## Usage
 
-    - name: Configure private repositories
-      # there are several bugs in npm 6.14.x that prevented us from using `npm config` for now
-      run: |
-        tee -a ~/.npmrc << END
-        @get-bridge:registry=https://npm.pkg.github.com/
-        //npm.pkg.github.com/:_authToken=\${BRIDGE_GITHUB_PACKAGES_NPM_AUTH_TOKEN}
-        END
-    - uses: get-bridge/translation-sync@v1.0.0
+    - uses: actions/setup-node@v2.4.0
+      with:
+        node-version: 14
+        scope: '@get-bridge'
+        registry-url: https://npm.pkg.github.com
+
+    - uses: get-bridge/translation-sync@v1.0.1
+      env:
+        NODE_AUTH_TOKEN: <token>
       with:
         config: test/fixtures/config.json
 
 ## Customizing
 
-### inputs
+### Inputs
+
+Note: the NODE_AUTH_TOKEN environemnt variable must be present otherwise authorization with the `@get-bridge` registry will fail.
 
 - `config`: *Optional* – default: `translation-sync.json`
   The path to the JSON-formatted configuration file. See
