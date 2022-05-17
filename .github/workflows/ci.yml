@@ -1,10 +1,17 @@
 name: ci
 
-on: [push, repository_dispatch]
+on:
+  pull_request_target:
+    types: [labeled]
+  push:
+    branches-ignore:
+      - "dependabot/**"
+  repository_dispatch:
 
 jobs:
   main:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'dependencies') || github.event_name == 'push'
     env:
       TRANSLATION_S3_PATH: s3://github-bridge-actions/sources/bridge-actions/en/en.json
       AWS_ACCESS_KEY_ID: access_key
