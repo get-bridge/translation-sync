@@ -18,4 +18,4 @@ runs:
       env:
         INPUT_CONFIG: ${{ inputs.config }}
       run: |
-        npx @get-bridge/sync-format-message-translations@^1.5.0 sync-translations --config "${INPUT_CONFIG:-TRANSLATION_SYNC_CONFIG}" --ignore-jira
+        npx @get-bridge/sync-format-message-translations@^1.5.1 sync-translations --config "${INPUT_CONFIG:-TRANSLATION_SYNC_CONFIG}" --ignore-jira
