@@ -1,4 +1,4 @@
-name: ci
+name: Test
 
 on:
   pull_request_target:
@@ -9,7 +9,8 @@ on:
   repository_dispatch:
 
 jobs:
-  main:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'dependencies') || github.event_name == 'push' || github.event_name == 'repository_dispatch'
     env:
@@ -33,6 +34,8 @@ jobs:
             server /data
 
       - uses: actions/checkout@v3.5.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v3.6.0
         with:
