@@ -33,7 +33,7 @@ jobs:
             minio/minio \
             server /data
 
-      - uses: actions/checkout@v3.5.2
+      - uses: actions/checkout@v3.5.3
         with:
           persist-credentials: false
 
