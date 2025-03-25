@@ -3,8 +3,8 @@
 ![ci](https://github.com/get-bridge/translation-sync/workflows/ci/badge.svg)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/get-bridge/translation-sync?sort=semver)
 
-Sync translation files to and from an s3-compatible remote bucket. This uses
-`@get-bridge/sync-format-message-translations` and thus requires authentication with
+Sync translation files to and from an s3-compatible remote bucket. This uses the
+[@get-bridge/sync-format-message-translations](https://github.com/get-bridge/sync-format-message-translations) npm package and thus requires authentication with
 Github Packages.
 
 ## Usage
@@ -15,7 +15,7 @@ Github Packages.
         scope: '@get-bridge'
         registry-url: https://npm.pkg.github.com
 
-    - uses: get-bridge/translation-sync@v1.0.1
+    - uses: get-bridge/translation-sync@v1.0.2
       env:
         NODE_AUTH_TOKEN: <token>
       with:
@@ -25,11 +25,11 @@ Github Packages.
 
 ### Inputs
 
-Note: the NODE_AUTH_TOKEN environemnt variable must be present otherwise authorization with the `@get-bridge` registry will fail.
+Note: the NODE_AUTH_TOKEN environment variable must be present, otherwise authorization with the `@get-bridge` registry will fail.
 
 - `config`: *Optional* – default: `translation-sync.json`
   The path to the JSON-formatted configuration file. See
-  `@get-bridge/sync-format-message-translations`'s own documentation for details.
+  `sync-format-message-translations`'s [own documentation](https://github.com/get-bridge/sync-format-message-translations) for details.
 
 The following inputs can be used as `step.with` keys or via the corresponding environment variable. The `steps.with` values will take precidence over equivalent environment variables.
 
