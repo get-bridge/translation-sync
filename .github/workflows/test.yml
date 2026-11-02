@@ -15,49 +15,51 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'dependencies') || github.event_name == 'push' || github.event_name == 'repository_dispatch'
     env:
       TRANSLATION_S3_PATH: s3://github-bridge-actions/sources/bridge-actions/en/en.json
-      AWS_ACCESS_KEY_ID: access_key
-      AWS_SECRET_ACCESS_KEY: sekret42
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-2
       AWS_EC2_METADATA_DISABLED: true
+      S3_ENDPOINT: http://localhost:9090
     steps:
-      # NOTE: this is ordered first so minio has time to start up and become healthy
-      - name: Start MinIO
+      - name: Start S3 mock
         run: |
           docker run \
-            --name=minio \
+            --name=s3mock \
             --detach \
-            -p 9000:9000 \
-            -e MINIO_ACCESS_KEY=${{ env.AWS_ACCESS_KEY_ID }} \
-            -e MINIO_SECRET_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} \
-            --health-interval=2s \
-            --health-cmd="curl --fail http://localhost:9000/minio/health/ready || exit 1" \
-            minio/minio \
-            server /data
+            -p 9090:9090 \
+            -e initialBuckets=github-bridge-actions \
+            adobe/s3mock:latest
 
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4.0.0
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 20
           scope: '@get-bridge'
           registry-url: https://npm.pkg.github.com
 
-      - name: Wait for MinIO to be healthy
+      - name: Wait for S3 mock to be ready
         run: |
           set -o xtrace
-          healthcheck () {
-            docker inspect --format='{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}' minio;
-          }
-          until [ "$(healthcheck)" = "healthy" ]; do sleep 2; done
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://localhost:9090/; then
+              echo "S3 mock is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "S3 mock failed to start"
+          docker logs s3mock
+          exit 1
 
-      - name: Create bucket 'github-bridge-actions'
-        run: |
-          # make the bucket match what's in config.json
-          aws --endpoint-url=http://localhost:9000 s3 mb s3://github-bridge-actions --region us-east-2
+      - name: Create bucket
+        run: aws --endpoint-url=$S3_ENDPOINT s3 mb s3://github-bridge-actions
 
       - name: Populate bucket with test fixture
-        run: aws --endpoint-url=http://localhost:9000 s3 cp test/fixtures/translations.json ${TRANSLATION_S3_PATH}
+        run: aws --endpoint-url=$S3_ENDPOINT s3 cp test/fixtures/translations.json ${TRANSLATION_S3_PATH}
+
       - name: Simulate adding a new translation message to en.json
         run: |
           cat test/fixtures/translations.json | \
@@ -76,7 +78,7 @@ jobs:
         run: |
           set -exu
           translation_json=$(
-            aws --endpoint-url=http://localhost:9000 \
+            aws --endpoint-url=$S3_ENDPOINT \
               s3 cp ${TRANSLATION_S3_PATH} - \
             | jq --compact-output . \
             | jq --raw-input . \
