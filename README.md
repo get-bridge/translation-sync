@@ -9,30 +9,53 @@ Github Packages.
 
 ## Usage
 
-    - uses: actions/setup-node@v2.4.0
-      with:
-        node-version: 14
-        scope: '@get-bridge'
-        registry-url: https://npm.pkg.github.com
+### With OIDC (recommended)
 
-    - uses: get-bridge/translation-sync@v1.0.2
-      env:
-        NODE_AUTH_TOKEN: <token>
-      with:
-        config: test/fixtures/config.json
+```yaml
+permissions:
+  id-token: write
+  contents: read
 
-## Customizing
+steps:
+  - uses: actions/setup-node@v4
+    with:
+      node-version-file: '.nvmrc'
+      scope: '@get-bridge'
+      registry-url: https://npm.pkg.github.com
 
-### Inputs
+  - uses: get-bridge/translation-sync@v2
+    with:
+      config: src/i18n/sync.json
+      role-to-assume: arn:aws:iam::127178877223:role/github/github-translations
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_PACKAGES_TOKEN }}
+```
 
-Note: the NODE_AUTH_TOKEN environment variable must be present, otherwise authorization with the `@get-bridge` registry will fail.
+### With static credentials (legacy)
 
-- `config`: *Optional* – default: `translation-sync.json`
-  The path to the JSON-formatted configuration file. See
-  `sync-format-message-translations`'s [own documentation](https://github.com/get-bridge/sync-format-message-translations) for details.
+```yaml
+steps:
+  - uses: actions/setup-node@v4
+    with:
+      node-version-file: '.nvmrc'
+      scope: '@get-bridge'
+      registry-url: https://npm.pkg.github.com
 
-The following inputs can be used as `step.with` keys or via the corresponding environment variable. The `steps.with` values will take precidence over equivalent environment variables.
+  - uses: get-bridge/translation-sync@v2
+    with:
+      config: src/i18n/sync.json
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.BRIDGE_TRANSLATIONS_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BRIDGE_TRANSLATIONS_AWS_SECRET_ACCESS_KEY }}
+      NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_PACKAGES_TOKEN }}
+```
 
-| Name      | env var                    | Required  | Default                  | Type    | Description                         |
-|-----------|----------------------------|-----------|--------------------------|---------|-------------------------------------|
-| `config`  | `TRANSLATION_SYNC_CONFIG`  | false     | `translation-sync.json`  | String  | Email associated with the username  |
+## Inputs
+
+Note: the `NODE_AUTH_TOKEN` environment variable must be present, otherwise authorization with the `@get-bridge` registry will fail.
+
+| Name              | Required | Default                  | Description                                                                 |
+|-------------------|----------|--------------------------|-----------------------------------------------------------------------------|
+| `config`          | false    | `translation-sync.json`  | Path to the JSON-formatted configuration file.                              |
+| `role-to-assume`  | false    |                          | IAM role ARN to assume via GitHub OIDC. No static credentials needed.       |
+| `aws-region`      | false    | `us-east-1`              | AWS region for the S3 buckets.                                              |
