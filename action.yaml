@@ -6,10 +6,12 @@ description: |
   with Github Packages.
 
   Supports two authentication methods:
-  1. **OIDC (recommended):** Pass `role-to-assume` and ensure the calling workflow
-     has `permissions: id-token: write`. No static credentials needed.
+  1. **OIDC (default):** Ensure the calling workflow has
+     `permissions: id-token: write`. The action assumes the default
+     `github-translations` role automatically. No static credentials needed.
   2. **Static credentials (legacy):** Set `AWS_ACCESS_KEY_ID` and
-     `AWS_SECRET_ACCESS_KEY` as environment variables.
+     `AWS_SECRET_ACCESS_KEY` as environment variables, and set
+     `role-to-assume` to empty string to disable OIDC.
 
 inputs:
   config:
@@ -18,7 +20,8 @@ inputs:
     description: Path to the JSON-formatted configuration file.
   role-to-assume:
     required: false
-    description: IAM role ARN to assume via GitHub OIDC. When set, static AWS credentials are not needed.
+    default: arn:aws:iam::127178877223:role/github/github-translations
+    description: IAM role ARN to assume via GitHub OIDC. Defaults to the github-translations role. Set to empty string to disable OIDC and use static credentials instead.
   aws-region:
     required: false
     default: us-east-1
