@@ -1,6 +1,6 @@
 {
   "to": "s3",
-  "endpoint": "http://localhost:9000",
+  "endpoint": "http://localhost:9090",
   "region": "us-east-2",
   "bucket": "github-bridge-actions",
   "project": "Bridge Actions",
