@@ -71,6 +71,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GIT_HUB_PACKAGES_TOKEN }}
         with:
           config: test/fixtures/config.json
+          role-to-assume: ''
 
       - name: Assert S3 was updated and matches local en.json
         env:
